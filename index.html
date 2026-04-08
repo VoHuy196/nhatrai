@@ -418,20 +418,31 @@
   // 2. Intercept XMLHttpRequest
   const XHRPrototype = XMLHttpRequest.prototype;
   const originalOpen = XHRPrototype.open;
+  const originalSetRequestHeader = XHRPrototype.setRequestHeader;
+  const originalSend = XHRPrototype.send;
   
   XHRPrototype.open = function(method, url) {
     if (url && (url.includes('/sync/') || url.includes('nhatrai-liart.vercel.app'))) {
       console.log('Blocked XHR call:', url);
-      // Return self but override send to do nothing
       this._blocked = true;
-      return;
+      // Return self but mark as opened
+      this.readyState = 1;
+      return this;
     }
     return originalOpen.apply(this, arguments);
   };
   
-  const originalSend = XHRPrototype.send;
+  XHRPrototype.setRequestHeader = function(...args) {
+    if (this._blocked) return this;
+    return originalSetRequestHeader.apply(this, arguments);
+  };
+  
   XHRPrototype.send = function(...args) {
-    if (this._blocked) return;
+    if (this._blocked) {
+      this.readyState = 4;
+      this.status = 0;
+      return this;
+    }
     return originalSend.apply(this, arguments);
   };
   
@@ -446,7 +457,7 @@
   
   // 4. Suppress unhandled promise rejections for blocked API calls
   window.addEventListener('unhandledrejection', function(event) {
-    if (event.reason && (event.reason.message === 'Blocked' || event.reason.includes && event.reason.includes('404'))) {
+    if (event.reason && (event.reason.message === 'Blocked' || (event.reason.includes && event.reason.includes('404')))) {
       console.warn('Suppressed API rejection');
       event.preventDefault();
     }
@@ -481,15 +492,13 @@
           return;
         }
         
-        // Prepare data for SheetDB
-        const data = {
-          data: [{
-            'Tên': fullName,
-            'Quan hệ': relationship,
-            'Lời chúc': blessing,
-            'Tham dự': attendance,
-            'Thời gian': timestamp
-          }]
+        // Prepare data for SheetDB - simple row format
+        const rowData = {
+          'Tên': fullName,
+          'Quan hệ': relationship || '',
+          'Lời chúc': blessing || '',
+          'Tham dự': attendance,
+          'Thời gian': timestamp
         };
         
         try {
@@ -497,20 +506,24 @@
           submitBtn.style.opacity = '0.6';
           submitBtn.style.pointerEvents = 'none';
           
-          // Send to SheetDB
+          // Send to SheetDB (simple POST format)
           const response = await fetch('https://sheetdb.io/api/v1/0x7lvv8dek5jv', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(rowData)
           });
           
-          if (response.ok) {
+          const result = await response.json();
+          
+          if (response.ok || result.created === 1) {
             // Success
             alert('✓ Cảm ơn bạn! Thông tin của bạn đã được lưu.');
             form.reset();
           } else {
+            console.error('SheetDB error:', result);
             alert('Lỗi khi lưu dữ liệu. Vui lòng thử lại.');
           }
         } catch (error) {
