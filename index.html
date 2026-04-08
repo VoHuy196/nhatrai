@@ -401,20 +401,56 @@
       window.page_currency = "VND"
     </script>
 <script>
-  // Disable old backend API calls - only use SheetDB
-  const originalXHR = window.XMLHttpRequest;
-  const XHRPrototype = originalXHR.prototype;
+  // ===== BLOCK OLD BACKEND API CALLS =====
+  
+  // 1. Intercept fetch calls
+  const originalFetch = window.fetch;
+  window.fetch = function(...args) {
+    const url = args[0];
+    // Block old sync and backend endpoints
+    if (url && (url.includes('/sync/') || url.includes('nhatrai-liart.vercel.app'))) {
+      console.log('Blocked API call:', url);
+      return Promise.reject(new Error('Blocked'));
+    }
+    return originalFetch.apply(this, arguments);
+  };
+  
+  // 2. Intercept XMLHttpRequest
+  const XHRPrototype = XMLHttpRequest.prototype;
   const originalOpen = XHRPrototype.open;
   
   XHRPrototype.open = function(method, url) {
-    // Block the old Pancake backend endpoint
-    if (url && url.includes('nhatrai-liart.vercel.app')) {
-      console.log('Blocked old API endpoint:', url);
-      // Create fake response
+    if (url && (url.includes('/sync/') || url.includes('nhatrai-liart.vercel.app'))) {
+      console.log('Blocked XHR call:', url);
+      // Return self but override send to do nothing
+      this._blocked = true;
       return;
     }
     return originalOpen.apply(this, arguments);
   };
+  
+  const originalSend = XHRPrototype.send;
+  XHRPrototype.send = function(...args) {
+    if (this._blocked) return;
+    return originalSend.apply(this, arguments);
+  };
+  
+  // 3. Suppress video player errors
+  window.addEventListener('error', function(event) {
+    if (event.message && event.message.includes("Cannot read properties of null (reading 'play')")) {
+      console.warn('Suppressed video player error');
+      event.preventDefault();
+      return true;
+    }
+  }, true);
+  
+  // 4. Suppress unhandled promise rejections for blocked API calls
+  window.addEventListener('unhandledrejection', function(event) {
+    if (event.reason && (event.reason.message === 'Blocked' || event.reason.includes && event.reason.includes('404'))) {
+      console.warn('Suppressed API rejection');
+      event.preventDefault();
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('d688ytkq');
