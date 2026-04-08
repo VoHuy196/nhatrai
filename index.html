@@ -446,12 +446,15 @@
     return originalSend.apply(this, arguments);
   };
   
-  // 3. Suppress video player errors
+  // 3. Suppress video player errors - only from extra_script video code
   window.addEventListener('error', function(event) {
     if (event.message && event.message.includes("Cannot read properties of null (reading 'play')")) {
-      console.warn('Suppressed video player error');
-      event.preventDefault();
-      return true;
+      // Only suppress if error comes from video element (#123) in extra_script
+      if (event.target && event.target.id === '123') {
+        console.warn('Suppressed video player error from element #123');
+        event.preventDefault();
+        return true;
+      }
     }
   }, true);
   
@@ -483,7 +486,9 @@
         const fullName = document.getElementById('wi-yj3hxu4w').value.trim();
         const relationship = document.getElementById('wi-qycil5et').value.trim();
         const blessing = document.getElementById('wi-81v32j1d').value.trim();
-        const attendance = document.querySelector('select[name="select_1gkq22"]').value;
+        // Get selected option's text content instead of value attribute (which is "untitled" in config)
+        const selectedOption = document.querySelector('select[name="select_1gkq22"] option:checked');
+        const attendance = selectedOption ? selectedOption.textContent.trim() : '';
         const timestamp = new Date().toLocaleString('vi-VN');
         
         // Validate required fields
