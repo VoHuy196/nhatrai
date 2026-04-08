@@ -401,11 +401,33 @@
       window.page_currency = "VND"
     </script>
 <script>
+  // Disable old backend API calls - only use SheetDB
+  const originalXHR = window.XMLHttpRequest;
+  const XHRPrototype = originalXHR.prototype;
+  const originalOpen = XHRPrototype.open;
+  
+  XHRPrototype.open = function(method, url) {
+    // Block the old Pancake backend endpoint
+    if (url && url.includes('nhatrai-liart.vercel.app')) {
+      console.log('Blocked old API endpoint:', url);
+      // Create fake response
+      return;
+    }
+    return originalOpen.apply(this, arguments);
+  };
+
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('d688ytkq');
     const submitBtn = document.querySelector('#w-jsy0cioh');
     
     if (form && submitBtn) {
+      // Prevent form default submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }, true);
+      
       submitBtn.addEventListener('click', async function(e) {
         e.preventDefault();
         e.stopPropagation();
