@@ -475,10 +475,11 @@
     const observer = new MutationObserver(function() {
       const qrEl = document.querySelector('#w-aiywg9g7 .image-background');
       if (qrEl) {
-        qrEl.style.backgroundImage = 'url("images/qr2.png")';
-        qrEl.style.backgroundSize = 'contain';
-        qrEl.style.backgroundRepeat = 'no-repeat';
-        qrEl.style.backgroundPosition = 'center';
+        qrEl.style.setProperty('background-image', 'url("images/qr2.png")', 'important');
+        qrEl.style.setProperty('background-size', 'contain', 'important');
+        qrEl.style.setProperty('background-repeat', 'no-repeat', 'important');
+        qrEl.style.setProperty('background-position', 'center center', 'important');
+        qrEl.style.setProperty('background-color', '#ffffff', 'important');
       }
     });
     observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style'] });
