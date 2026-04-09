@@ -469,13 +469,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     // Override QR image in popup - patch runtime data
     if (window.event_data && window.event_data.runtime && window.event_data.runtime.vm && window.event_data.runtime.vm['aiywg9g7']) {
-      window.event_data.runtime.vm['aiywg9g7'].specials.src = 'images/qr2.png';
+      window.event_data.runtime.vm['aiywg9g7'].specials.src = 'images/qr3.png';
     }
     // Also watch for popup open and directly set background-image
     const observer = new MutationObserver(function() {
       const qrEl = document.querySelector('#w-aiywg9g7 .image-background');
       if (qrEl) {
-        qrEl.style.setProperty('background-image', 'url("images/qr2.png")', 'important');
+        qrEl.style.setProperty('background-image', 'url("images/qr3.png")', 'important');
         qrEl.style.setProperty('background-size', 'contain', 'important');
         qrEl.style.setProperty('background-repeat', 'no-repeat', 'important');
         qrEl.style.setProperty('background-position', 'center center', 'important');
