@@ -8966,11 +8966,23 @@
           const relationship = document.getElementById('wi-qycil5et').value.trim();
           const blessing = document.getElementById('wi-81v32j1d').value.trim();
           // Get attendance value - read textContent of selected option (value attr is "untitled" in config)
-          const selectEl = document.querySelector('#w-gkkgczp7 select');
-          const selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
-          const attendance = (selectedOption && selectedOption.value !== '') ? selectedOption.textContent.trim() : '';
+         // const selectEl = document.querySelector('#w-gkkgczp7 select');
+         // const selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
+         // const attendance = (selectedOption && selectedOption.value !== '') ? selectedOption.textContent.trim() : '';
           const timestamp = new Date().toLocaleString('vi-VN');
+          // Đoạn code ĐÃ SỬA:
+const selectEl = document.querySelector('#w-gkkgczp7 select');
+let attendance = '';
 
+if (selectEl && selectEl.selectedIndex !== -1) {
+    const selectedOption = selectEl.options[selectEl.selectedIndex];
+    // Nếu option là rỗng hoặc "untitled", lấy chữ hiển thị bên ngoài
+    if (selectedOption.value === '' || selectedOption.value === 'untitled') {
+        attendance = selectedOption.textContent.trim();
+    } else {
+        attendance = selectedOption.value.trim();
+    }
+}
           // Validate required fields
           if (!fullName || !attendance) {
             alert('Vui lòng điền đầy đủ thông tin bắt buộc');
