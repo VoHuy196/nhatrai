@@ -486,9 +486,10 @@
         const fullName = document.getElementById('wi-yj3hxu4w').value.trim();
         const relationship = document.getElementById('wi-qycil5et').value.trim();
         const blessing = document.getElementById('wi-81v32j1d').value.trim();
-        // Get selected option's text content instead of value attribute (which is "untitled" in config)
-        const selectedOption = document.querySelector('select[name="select_1gkq22"] option:checked');
-        const attendance = selectedOption ? selectedOption.textContent.trim() : '';
+        // Get attendance value - read textContent of selected option (value attr is "untitled" in config)
+        const selectEl = document.querySelector('#w-gkkgczp7 select');
+        const selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
+        const attendance = (selectedOption && selectedOption.value !== '') ? selectedOption.textContent.trim() : '';
         const timestamp = new Date().toLocaleString('vi-VN');
         
         // Validate required fields
@@ -511,14 +512,14 @@
           submitBtn.style.opacity = '0.6';
           submitBtn.style.pointerEvents = 'none';
           
-          // Send to SheetDB (simple POST format)
+          // Send to SheetDB - must wrap in { data: [rowData] } per SheetDB v1 API spec
           const response = await fetch('https://sheetdb.io/api/v1/0x7lvv8dek5jv', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             },
-            body: JSON.stringify(rowData)
+            body: JSON.stringify({ data: [rowData] })
           });
           
           const result = await response.json();
