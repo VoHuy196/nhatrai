@@ -8956,30 +8956,28 @@
       const submitBtn = document.querySelector('#w-jsy0cioh');
 
       if (form && submitBtn) {
-        // Prevent form default submission
+        // Ngăn chặn form gửi đi theo cách mặc định của trình duyệt
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           e.stopPropagation();
           return false;
         }, true);
 
+        // Xử lý nút GỬI NGAY (Xác nhận tham dự)
         submitBtn.addEventListener('click', async function (e) {
           e.preventDefault();
           e.stopPropagation();
 
-          // 1. Lấy giá trị các ô nhập liệu
           const fullName = document.getElementById('wi-yj3hxu4w')?.value.trim();
           const relationship = document.getElementById('wi-qycil5et')?.value.trim();
           const blessing = document.getElementById('wi-81v32j1d')?.value.trim();
           const selectEl = document.querySelector('#w-gkkgczp7 select');
           
-          // 2. Lấy chữ Tham dự (Chống lỗi lấy nhầm tiêu đề)
           let attendance = '';
-          if (selectEl && selectEl.selectedIndex > 0) { // > 0 để bỏ qua dòng "Bạn có tham dự không?"
+          if (selectEl && selectEl.selectedIndex > 0) {
             attendance = selectEl.options[selectEl.selectedIndex].textContent.trim();
           }
 
-          // 3. Kiểm tra bắt buộc
           if (!fullName || !attendance || attendance === "Bạn Có Tham Dự Không?") {
             alert('Vui lòng điền tên và chọn trạng thái tham dự ❤️');
             return;
@@ -8989,7 +8987,7 @@
             'Tên': fullName,
             'Quan hệ': relationship || '',
             'Lời chúc': blessing || '',
-            'tham_du': attendance,
+            'tham_du': attendance, // Huy lưu ý tên cột trên Sheet phải đúng chữ "Tham dự" nhé
             'Thời gian': new Date().toLocaleString('vi-VN')
           };
 
@@ -8997,20 +8995,15 @@
             submitBtn.style.opacity = '0.6';
             submitBtn.style.pointerEvents = 'none';
 
-            // GỬI ĐƠN GIẢN: Đổi từ {data: [rowData]} thành [rowData] để SheetDB dễ nhận dạng
             const response = await fetch('https://sheetdb.io/api/v1/0x7lvv8dek5jv', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify([rowData]) 
             });
 
             if (response.ok) {
               alert('✓ Cảm ơn bạn! Thông tin của bạn đã được lưu.');
-              if(form) form.reset();
-              // Đóng popup
-              document.querySelector('[id*="n773xftp"]')?.click();
+              form.reset();
             } else {
               alert('Lỗi khi lưu dữ liệu. Huy kiểm tra lại link SheetDB nhé!');
             }
@@ -9021,8 +9014,31 @@
             submitBtn.style.opacity = '1';
             submitBtn.style.pointerEvents = 'auto';
           }
+        }); // Đã đóng ngoặc đúng ở đây
+      }
+
+      // --- FIX LỖI NÚT GỬI MỪNG CƯỚI ---
+      const sendGiftBtn = document.getElementById('w-qbpa8242'); // Nút gửi mừng cưới
+      const giftPopup = document.getElementById('w-gjiwv76m'); // Popup QR mừng cưới
+      const backdrop = document.getElementById('popup-backdrop'); // Lớp nền mờ
+
+      if (sendGiftBtn && giftPopup) {
+        sendGiftBtn.addEventListener('click', function() {
+           giftPopup.classList.remove('d-none');
+           backdrop?.classList.remove('d-none');
         });
-  </script>
+      }
+
+      // Đóng popup mừng cưới khi nhấn nút đóng (X)
+      const closeGiftBtn = document.getElementById('w-gwevy1sz');
+      if (closeGiftBtn) {
+        closeGiftBtn.addEventListener('click', function() {
+          giftPopup.classList.add('d-none');
+          backdrop?.classList.add('d-none');
+        });
+      }
+    }); // Đóng DomContentLoaded
+</script>
   <script id="service_worker">
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
