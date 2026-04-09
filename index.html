@@ -8935,8 +8935,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       // Override QR image in popup - patch runtime data
-      if (window.event_data && window.event_data.runtime && window.event_data.runtime.vm && window.event_data.runtime.vm['aiywg9g7']) {
-        window.event_data.runtime.vm['aiywg9g7'].specials.src = 'images/qr3.png';
+      if (window.event_data?.runtime?.vm?.['aiywg9g7']?.specials) {
+          window.event_data.runtime.vm['aiywg9g7'].specials.src = 'images/qr3.png';
       }
       // Also watch for popup open and directly set background-image
       const observer = new MutationObserver(function () {
@@ -8976,15 +8976,12 @@
          // const attendance = (selectedOption && selectedOption.value !== '') ? selectedOption.textContent.trim() : '';
           const timestamp = new Date().toLocaleString('vi-VN');
           // Đoạn code ĐÃ SỬA:
+// Thay thế đoạn xử lý selectEl cũ bằng đoạn này
 const selectEl = document.querySelector('#w-gkkgczp7 select');
 let attendance = '';
 
-if (selectEl && selectEl.selectedIndex !== -1) {
-    const selectedOption = selectEl.options[selectEl.selectedIndex];
-    // Nếu option là rỗng hoặc "untitled", lấy chữ hiển thị bên ngoài
-    if (selectEl && selectEl.selectedIndex > 0) {
-    attendance = selectEl.options[selectEl.selectedIndex].textContent.trim();
-}
+if (selectEl && selectEl.selectedIndex > 0) {
+    attendance = selectEl.options[selectEl.selectedIndex].textContent?.trim() || '';
 }
           // Validate required fields
           if (!fullName || !attendance) {
