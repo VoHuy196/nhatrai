@@ -9115,5 +9115,24 @@
   </script>
   <script src="js/animations.js"></script>
 </body>
+<script>
+    (() => {
+      // --- XỬ LÝ TÊN KHÁCH MỜI TỪ URL ---
+      const params = new URLSearchParams(window.location.search);
+      const guestName = params.get('guest');
+
+      if (guestName) {
+        // Block hiển thị tên có id là 'lme5ajk5', element ID trong HTML là 'w-lme5ajk5'
+        const observer = new MutationObserver((mutations, obs) => {
+          const guestEl = document.querySelector('#w-lme5ajk5 .text-block-css');
+          if (guestEl && guestEl.innerHTML.includes('Tên Khách Mời')) {
+            guestEl.innerHTML = guestEl.innerHTML.replace('Tên Khách Mời', guestName);
+            // obs.disconnect(); // Có thể ngắt nếu chỉ cần đổi 1 lần, nhưng để yên tâm thì cứ kệ
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+    })();
+</script>
 
 </html>
